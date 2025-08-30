@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestionar Apartamentos - Sistema de Gestión de Residentes{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-home me-2"></i>Gestionar Apartamentos
+                </h1>
+                <a href="{% url 'residentes_frontend:dashboard' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Volver al Dashboard
+                </a>
+            </div>
+
+            <!-- Formulario para crear apartamento -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-plus me-2"></i>Crear Nuevo Apartamento
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="formApartamento">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-floating mb-3">
+                                    <select class="form-select" id="edificio_id" name="edificio_id" required>
+                                        <option value="">Seleccione edificio</option>
+                                        {% for edificio in edificios %}
+                                            <option value="{{ edificio.id }}">Edificio {{ edificio.numero }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <label for="edificio_id">Edificio</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-floating mb-3">
+                                    <select class="form-select" id="piso" name="piso" required>
+                                        <option value="">Seleccione piso</option>
+                                        <option value="1">Piso 1</option>
+                                        <option value="2">Piso 2</option>
+                                        <option value="3">Piso 3</option>
+                                        <option value="4">Piso 4</option>
+                                        <option value="5">Piso 5</option>
+                                        <option value="6">Piso 6</option>
+                                        <option value="7">Piso 7</option>
+                                        <option value="8">Piso 8</option>
+                                    </select>
+                                    <label for="piso">Piso</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-floating mb-3">
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="numero" 
+                                           name="numero" 
+                                           required 
+                                           placeholder="ej: 1A, 2B, 3I, 4D">
+                                    <label for="numero">Número de Apartamento</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Crear Apartamento
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <!-- Panel de ayuda -->
+                    <div class="alert alert-info mt-3">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-info-circle me-2"></i>Reglas del Sistema
+                        </h6>
+                        <ul class="mb-0">
+                            <li><strong>Edificios 1-22:</strong> Los apartamentos deben terminar en A o B (ej: 1A, 2B, 3A)</li>
+                            <li><strong>Edificios 23-32:</strong> Los apartamentos deben terminar en I o D (ej: 1I, 2D, 3I)</li>
+                            <li>Cada piso tiene exactamente 2 apartamentos (uno para cada tipo de puerta)</li>
+                            <li>El número debe ser coherente con el edificio seleccionado</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de apartamentos existentes -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>Apartamentos Existentes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if apartamentos %}
+                        <div class="table-responsive">
+                            <table class="table table-hover table-custom">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Edificio</th>
+                                        <th>Piso</th>
+                                        <th>Número</th>
+                                        <th>Total Residentes</th>
+                                        <th>Fecha Creación</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for apartamento in apartamentos %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-primary">Edificio {{ apartamento.edificio.numero }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">Piso {{ apartamento.piso }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary fs-6">{{ apartamento.numero }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-success">{{ apartamento.residentes.count }}</span>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+                                                {{ apartamento.created_at|date:"d/m/Y H:i" }}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-sm btn-outline-info" 
+                                                        title="Ver Detalles" disabled>
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <a href="{% url 'residentes_frontend:buscar_residentes' %}?edificio_id={{ apartamento.edificio.id }}&piso={{ apartamento.piso }}&numero_apartamento={{ apartamento.numero }}" 
+                                                   class="btn btn-sm btn-outline-primary" 
+                                                   title="Ver Residentes">
+                                                    <i class="fas fa-users"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-home fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No hay apartamentos registrados</h5>
+                            <p class="text-muted">Crea el primer apartamento usando el formulario de arriba</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('formApartamento');
+    const edificioSelect = document.getElementById('edificio_id');
+    const pisoSelect = document.getElementById('piso');
+    const numeroInput = document.getElementById('numero');
+    
+    // Validación del formulario
+    form.addEventListener('submit', function(e) {
+        const edificioId = edificioSelect.value;
+        const piso = pisoSelect.value;
+        const numero = numeroInput.value.trim();
+        
+        if (!edificioId || !piso || !numero) {
+            e.preventDefault();
+            alert('Todos los campos son obligatorios');
+            return false;
+        }
+        
+        // Validar coherencia del número con el edificio
+        const edificioNumero = parseInt(edificioSelect.options[edificioSelect.selectedIndex].text.replace('Edificio ', ''));
+        const puerta = numero.slice(-1); // Último carácter del número
+        
+        if (edificioNumero <= 22) {
+            if (!['A', 'B'].includes(puerta)) {
+                e.preventDefault();
+                alert('Los apartamentos de edificios 1-22 deben terminar en A o B');
+                numeroInput.focus();
+                return false;
+            }
+        } else {
+            if (!['I', 'D'].includes(puerta)) {
+                e.preventDefault();
+                alert('Los apartamentos de edificios 23-32 deben terminar en I o D');
+                numeroInput.focus();
+                return false;
+            }
+        }
+    });
+    
+    // Validación en tiempo real del número
+    numeroInput.addEventListener('input', function() {
+        const edificioId = edificioSelect.value;
+        if (!edificioId) return;
+        
+        const edificioNumero = parseInt(edificioSelect.options[edificioSelect.selectedIndex].text.replace('Edificio ', ''));
+        const numero = this.value.trim();
+        const puerta = numero.slice(-1);
+        
+        if (numero) {
+            if (edificioNumero <= 22) {
+                if (!['A', 'B'].includes(puerta)) {
+                    this.classList.add('is-invalid');
+                } else {
+                    this.classList.remove('is-invalid');
+                }
+            } else {
+                if (!['I', 'D'].includes(puerta)) {
+                    this.classList.add('is-invalid');
+                } else {
+                    this.classList.remove('is-invalid');
+                }
+            }
+        } else {
+            this.classList.remove('is-invalid');
+        }
+    });
+    
+    // Actualizar validación cuando cambie el edificio
+    edificioSelect.addEventListener('change', function() {
+        numeroInput.value = '';
+        numeroInput.classList.remove('is-invalid');
+    });
+});
+</script>
+{% endblock %}

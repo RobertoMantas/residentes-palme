@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-tachometer-alt"></i> Dashboard
+        </h1>
+        <p class="lead text-muted">Bienvenido al Sistema de Gestión de Residentes de Palme</p>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="number">{{ stats.total_edificios }}</div>
+            <div class="label">Total Edificios</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="number">{{ stats.total_apartamentos }}</div>
+            <div class="label">Total Apartamentos</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="number">{{ stats.total_residentes }}</div>
+            <div class="label">Total Residentes</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="number">{{ stats.edificios_con_residentes }}</div>
+            <div class="label">Edificios Ocupados</div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-bolt"></i> Acciones Rápidas
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <a href="{% url 'residentes_frontend:subir_residente' %}" class="btn btn-primary w-100">
+                            <i class="fas fa-user-plus"></i><br>
+                            Subir Residente
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{% url 'residentes_frontend:buscar_residentes' %}" class="btn btn-success w-100">
+                            <i class="fas fa-search"></i><br>
+                            Buscar Residentes
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{% url 'residentes_frontend:gestionar_edificios' %}" class="btn btn-info w-100">
+                            <i class="fas fa-building"></i><br>
+                            Gestionar Edificios
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{% url 'residentes_frontend:gestionar_apartamentos' %}" class="btn btn-warning w-100">
+                            <i class="fas fa-home"></i><br>
+                            Gestionar Apartamentos
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Residents -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-users"></i> Residentes Recientes
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if residentes_recientes %}
+                    <div class="row">
+                        {% for residente in residentes_recientes %}
+                        <div class="col-md-4 mb-3">
+                            <div class="resident-card">
+                                {% if residente.foto %}
+                                    <img src="{{ residente.foto.url }}" alt="Foto de {{ residente.nombre_completo }}" class="resident-photo">
+                                {% else %}
+                                    <div class="resident-photo d-flex align-items-center justify-content-center bg-light">
+                                        <i class="fas fa-user fa-3x text-muted"></i>
+                                    </div>
+                                {% endif %}
+                                <div class="resident-info">
+                                    <div class="resident-name">{{ residente.nombre_completo }}</div>
+                                    <div class="resident-location">
+                                        <strong>Edificio:</strong> {{ residente.apartamento.edificio.numero }}<br>
+                                        <strong>Puerta:</strong> {{ residente.apartamento.edificio.puerta }}<br>
+                                        <strong>Piso:</strong> {{ residente.apartamento.piso }}<br>
+                                        <strong>Apartamento:</strong> {{ residente.apartamento.numero }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{% url 'residentes_frontend:buscar_residentes' %}" class="btn btn-outline-primary">
+                            Ver Todos los Residentes
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No hay residentes registrados aún.</p>
+                        <a href="{% url 'residentes_frontend:subir_residente' %}" class="btn btn-primary">
+                            <i class="fas fa-user-plus"></i> Agregar Primer Residente
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Information -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle"></i> Información del Sistema
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-building text-primary"></i> Estructura del Complejo</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Total de Edificios:</strong> 32</li>
+                            <li><strong>Pisos por Edificio:</strong> 8</li>
+                            <li><strong>Edificios 1-22:</strong> Puertas A y B</li>
+                            <li><strong>Edificios 23-32:</strong> Puertas I y D</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-cog text-success"></i> Funcionalidades</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success"></i> Gestión de Residentes</li>
+                            <li><i class="fas fa-check text-success"></i> Búsqueda Avanzada</li>
+                            <li><i class="fas fa-check text-success"></i> Gestión de Edificios</li>
+                            <li><i class="fas fa-check text-success"></i> Gestión de Apartamentos</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

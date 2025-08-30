@@ -1,0 +1,295 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-user-plus"></i> Subir Información de Residente
+        </h1>
+        <p class="lead text-muted">Complete el formulario para registrar un nuevo residente en el sistema</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-edit"></i> Formulario de Registro
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" id="residenteForm">
+                    {% csrf_token %}
+                    
+                    <!-- Información Personal -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="nombre_completo" class="form-label">
+                                <i class="fas fa-user"></i> Nombre Completo *
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="nombre_completo" 
+                                   name="nombre_completo" 
+                                   required
+                                   placeholder="Ej: Juan Carlos Pérez García">
+                            <div class="form-text">Ingrese el nombre completo del residente</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="tipo" class="form-label">
+                                <i class="fas fa-user-tag"></i> Tipo de Residente *
+                            </label>
+                            <select class="form-select" id="tipo" name="tipo" required>
+                                <option value="">Seleccione el tipo</option>
+                                <option value="propietario">Propietario</option>
+                                <option value="inquilino">Inquilino</option>
+                            </select>
+                            <div class="form-text">Propietario o inquilino del apartamento</div>
+                        </div>
+                    </div>
+
+                    <!-- Foto del Residente -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="foto" class="form-label">
+                                <i class="fas fa-camera"></i> Foto del Residente
+                            </label>
+                            <input type="file" 
+                                   class="form-control" 
+                                   id="foto" 
+                                   name="foto" 
+                                   accept="image/*">
+                            <div class="form-text">Formatos: JPG, PNG, GIF (máx. 10MB)</div>
+                        </div>
+                    </div>
+
+                    <!-- Selección de Edificio -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="edificio_select" class="form-label">
+                                <i class="fas fa-building"></i> Edificio *
+                            </label>
+                            <select class="form-select" id="edificio_select" required>
+                                <option value="">Seleccione un edificio</option>
+                                {% for edificio in edificios %}
+                                <option value="{{ edificio.id }}">
+                                    Edificio {{ edificio.numero }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="piso" class="form-label">
+                                <i class="fas fa-layer-group"></i> Piso *
+                            </label>
+                            <select class="form-select" id="piso" required>
+                                <option value="">Seleccione el piso</option>
+                                {% for i in "12345678" %}
+                                <option value="{{ i }}">Piso {{ i }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Selección de Apartamento -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="apartamento_id" class="form-label">
+                                <i class="fas fa-home"></i> Apartamento *
+                            </label>
+                            <select class="form-select" id="apartamento_id" name="apartamento_id" required>
+                                <option value="">Primero seleccione edificio y piso</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                <i class="fas fa-info-circle"></i> Información del Apartamento
+                            </label>
+                            <div id="apartamento_info" class="form-control-plaintext text-muted">
+                                Seleccione edificio, piso y apartamento para ver la información
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="row">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save"></i> Guardar Residente
+                            </button>
+                            <a href="{% url 'residentes_frontend:dashboard' %}" class="btn btn-outline-secondary btn-lg ms-2">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel de Ayuda -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-question-circle"></i> Ayuda
+                </h5>
+            </div>
+            <div class="card-body">
+                <h6><i class="fas fa-lightbulb text-warning"></i> Consejos</h6>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success"></i> 
+                        <strong>Nombre:</strong> Use el nombre completo oficial
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success"></i> 
+                        <strong>Tipo:</strong> Seleccione si es propietario o inquilino
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success"></i> 
+                        <strong>Foto:</strong> Asegúrese de que sea clara y reciente
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success"></i> 
+                        <strong>Ubicación:</strong> Seleccione primero el edificio y piso
+                    </li>
+                </ul>
+
+                <hr>
+
+                <h6><i class="fas fa-info-circle text-info"></i> Reglas del Sistema</h6>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <strong>Edificios 1-22:</strong> Solo puertas A y B
+                    </li>
+                    <li class="mb-2">
+                        <strong>Edificios 23-32:</strong> Solo puertas I y D
+                    </li>
+                    <li class="mb-2">
+                        <strong>Pisos:</strong> Del 1 al 8
+                    </li>
+                    <li class="mb-2">
+                        <strong>Propietarios:</strong> Solo 1 por apartamento
+                    </li>
+                    <li class="mb-2">
+                        <strong>Máximo residentes:</strong> 6 por apartamento
+                    </li>
+                </ul>
+
+                <hr>
+
+                <h6><i class="fas fa-exclamation-triangle text-warning"></i> Campos Obligatorios</h6>
+                <p class="text-muted small">Los campos marcados con * son obligatorios para completar el registro.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const edificioSelect = document.getElementById('edificio_select');
+    const pisoSelect = document.getElementById('piso');
+    const apartamentoSelect = document.getElementById('apartamento_id');
+    const apartamentoInfo = document.getElementById('apartamento_info');
+    const tipoSelect = document.getElementById('tipo');
+    
+    // Datos de apartamentos disponibles
+    const apartamentos = [
+        {% for apartamento in apartamentos %}
+        {
+            id: '{{ apartamento.id }}',
+            edificio_id: '{{ apartamento.edificio.id }}',
+            piso: {{ apartamento.piso }},
+            numero: '{{ apartamento.numero }}',
+            edificio_numero: {{ apartamento.edificio.numero }}
+        },
+        {% endfor %}
+    ];
+    
+    function actualizarApartamentos() {
+        const edificioId = edificioSelect.value;
+        const piso = pisoSelect.value;
+        
+        // Limpiar opciones
+        apartamentoSelect.innerHTML = '<option value="">Seleccione un apartamento</option>';
+        apartamentoInfo.textContent = 'Seleccione un apartamento para ver la información';
+        
+        if (edificioId && piso) {
+            const apartamentosFiltrados = apartamentos.filter(apt => 
+                apt.edificio_id === edificioId && apt.piso == piso
+            );
+            
+            if (apartamentosFiltrados.length > 0) {
+                apartamentosFiltrados.forEach(apt => {
+                    const option = document.createElement('option');
+                    option.value = apt.id;
+                    option.textContent = `Apartamento ${apt.numero}`;
+                    apartamentoSelect.appendChild(option);
+                });
+            } else {
+                apartamentoSelect.innerHTML = '<option value="">No hay apartamentos disponibles</option>';
+            }
+        }
+    }
+    
+    function actualizarInfoApartamento() {
+        const apartamentoId = apartamentoSelect.value;
+        if (apartamentoId) {
+            const apartamento = apartamentos.find(apt => apt.id === apartamentoId);
+            if (apartamento) {
+                apartamentoInfo.innerHTML = `
+                    <strong>Edificio:</strong> ${apartamento.edificio_numero}<br>
+                    <strong>Piso:</strong> ${apartamento.piso}<br>
+                    <strong>Apartamento:</strong> ${apartamento.numero}
+                `;
+            }
+        } else {
+            apartamentoInfo.textContent = 'Seleccione un apartamento para ver la información';
+        }
+    }
+    
+    // Event listeners
+    edificioSelect.addEventListener('change', actualizarApartamentos);
+    pisoSelect.addEventListener('change', actualizarApartamentos);
+    apartamentoSelect.addEventListener('change', actualizarInfoApartamento);
+    
+    // Validación del formulario
+    document.getElementById('residenteForm').addEventListener('submit', function(e) {
+        const nombre = document.getElementById('nombre_completo').value.trim();
+        const tipo = tipoSelect.value;
+        const apartamento = apartamentoSelect.value;
+        
+        if (!nombre) {
+            e.preventDefault();
+            alert('Por favor, ingrese el nombre completo del residente.');
+            return false;
+        }
+        
+        if (!tipo) {
+            e.preventDefault();
+            alert('Por favor, seleccione el tipo de residente.');
+            return false;
+        }
+        
+        if (!apartamento) {
+            e.preventDefault();
+            alert('Por favor, seleccione un apartamento.');
+            return false;
+        }
+        
+        // Validar que se haya seleccionado edificio y piso
+        if (!edificioSelect.value || !pisoSelect.value) {
+            e.preventDefault();
+            alert('Por favor, seleccione tanto el edificio como el piso.');
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}

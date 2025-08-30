@@ -1,0 +1,278 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-search"></i> Buscar Residentes
+        </h1>
+        <p class="lead text-muted">Encuentre residentes usando diferentes criterios de búsqueda</p>
+    </div>
+</div>
+
+<!-- Filtros de Búsqueda -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-filter"></i> Filtros de Búsqueda
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="get" id="searchForm">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label for="nombre" class="form-label">
+                                <i class="fas fa-user"></i> Nombre del Residente
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="nombre" 
+                                   name="nombre" 
+                                   value="{{ filtros.nombre }}"
+                                   placeholder="Buscar por nombre...">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="edificio_id" class="form-label">
+                                <i class="fas fa-building"></i> Edificio
+                            </label>
+                            <select class="form-select" id="edificio_id" name="edificio_id">
+                                <option value="">Todos los edificios</option>
+                                {% for edificio in edificios %}
+                                <option value="{{ edificio.id }}" 
+                                        {% if filtros.edificio_id == edificio.id|stringformat:"s" %}selected{% endif %}>
+                                    Edificio {{ edificio.numero }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <label for="piso" class="form-label">
+                                <i class="fas fa-layer-group"></i> Piso
+                            </label>
+                            <select class="form-select" id="piso" name="piso">
+                                <option value="">Todos los pisos</option>
+                                {% for i in "12345678" %}
+                                <option value="{{ i }}" {% if filtros.piso == i %}selected{% endif %}>
+                                    Piso {{ i }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <label for="numero_apartamento" class="form-label">
+                                <i class="fas fa-home"></i> Apartamento
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="numero_apartamento" 
+                                   name="numero_apartamento" 
+                                   value="{{ filtros.numero_apartamento }}"
+                                   placeholder="Número apto...">
+                        </div>
+                        <div class="col-md-2 mb-3 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search"></i> Buscar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Botones adicionales -->
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <a href="{% url 'residentes_frontend:buscar_residentes' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Limpiar Filtros
+                            </a>
+                            <button type="button" class="btn btn-outline-info ms-2" id="exportBtn">
+                                <i class="fas fa-download"></i> Exportar Resultados
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Resultados de Búsqueda -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-list"></i> Resultados de la Búsqueda
+                </h5>
+                <span class="badge bg-primary fs-6">
+                    {% if residentes %}
+                        {{ residentes.paginator.count }} residente{{ residentes.paginator.count|pluralize:"s" }} encontrado{{ residentes.paginator.count|pluralize:"s" }}
+                    {% else %}
+                        No se encontraron residentes
+                    {% endif %}
+                </span>
+            </div>
+            <div class="card-body">
+                {% if residentes %}
+                    <!-- Vista de Tarjetas -->
+                    <div class="row" id="residentesGrid">
+                        {% for residente in residentes %}
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            <div class="resident-card">
+                                {% if residente.foto %}
+                                    <img src="{{ residente.foto.url }}" 
+                                         alt="Foto de {{ residente.nombre_completo }}" 
+                                         class="resident-photo">
+                                {% else %}
+                                    <div class="resident-photo d-flex align-items-center justify-content-center bg-light">
+                                        <i class="fas fa-user fa-3x text-muted"></i>
+                                    </div>
+                                {% endif %}
+                                <div class="resident-info">
+                                    <div class="resident-name">{{ residente.nombre_completo }}</div>
+                                    <div class="resident-location">
+                                        <strong>Edificio:</strong> {{ residente.apartamento.edificio.numero }}<br>
+                                        <strong>Piso:</strong> {{ residente.apartamento.piso }}<br>
+                                        <strong>Apartamento:</strong> {{ residente.apartamento.numero }}
+                                    </div>
+                                    
+                                    <!-- Botones de Acción -->
+                                    <div class="mt-3">
+                                        <a href="{% url 'residentes_frontend:ver_detalles_residente' residente.id %}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i> Ver Detalles
+                                        </a>
+                                        <button type="button" 
+                                                class="btn btn-sm btn-outline-danger ms-2"
+                                                onclick="confirmarEliminacion('{{ residente.id }}', '{{ residente.nombre_completo }}')">
+                                            <i class="fas fa-trash"></i> Eliminar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Paginación -->
+                    {% if residentes.has_other_pages %}
+                    <nav aria-label="Paginación de residentes" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if residentes.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page=1">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ residentes.previous_page_number }}">
+                                        <i class="fas fa-angle-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            
+                            {% for num in residentes.paginator.page_range %}
+                                {% if residentes.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > residentes.number|add:'-3' and num < residentes.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if residentes.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ residentes.next_page_number }}">
+                                        <i class="fas fa-angle-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ residentes.paginator.num_pages }}">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                    
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No se encontraron residentes</h5>
+                        <p class="text-muted">Intente ajustar los filtros de búsqueda o agregar nuevos residentes.</p>
+                        <a href="{% url 'residentes_frontend:subir_residente' %}" class="btn btn-primary">
+                            <i class="fas fa-user-plus"></i> Agregar Nuevo Residente
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmación de Eliminación -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle text-danger"></i> Confirmar Eliminación
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro de que desea eliminar al residente <strong id="residenteNombre"></strong>?</p>
+                <p class="text-muted small">Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <form method="post" id="deleteForm" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Eliminar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function confirmarEliminacion(residenteId, nombreResidente) {
+    document.getElementById('residenteNombre').textContent = nombreResidente;
+    document.getElementById('deleteForm').action = `/eliminar-residente/${residenteId}/`;
+    
+    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    deleteModal.show();
+}
+
+// Búsqueda en tiempo real (opcional)
+document.getElementById('searchForm').addEventListener('submit', function(e) {
+    // La búsqueda se realiza automáticamente al enviar el formulario
+    // Se puede implementar búsqueda AJAX aquí si se desea
+});
+
+// Exportar resultados (funcionalidad básica)
+document.getElementById('exportBtn').addEventListener('click', function() {
+    // Implementar exportación a CSV o PDF
+    alert('Funcionalidad de exportación en desarrollo');
+});
+
+// Auto-submit del formulario cuando cambien los filtros (opcional)
+document.querySelectorAll('#searchForm select, #searchForm input[type="text"]').forEach(function(element) {
+    element.addEventListener('change', function() {
+        // Descomentar la siguiente línea para búsqueda automática
+        // document.getElementById('searchForm').submit();
+    });
+});
+</script>
+{% endblock %}

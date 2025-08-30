@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'residentes_frontend:dashboard' %}">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'residentes_frontend:buscar_residentes' %}">
+                        <i class="fas fa-search"></i> Buscar Residentes
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-user"></i> {{ residente.nombre_completo }}
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-user"></i> Detalles del Residente
+        </h1>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Información del Residente -->
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-user-circle"></i> Información Personal
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 text-center mb-3">
+                        {% if residente.foto %}
+                            <img src="{{ residente.foto.url }}" 
+                                 alt="Foto de {{ residente.nombre_completo }}" 
+                                 class="img-fluid rounded" 
+                                 style="max-width: 200px; max-height: 200px;">
+                        {% else %}
+                            <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                 style="width: 200px; height: 200px;">
+                                <i class="fas fa-user fa-4x text-muted"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-8">
+                        <h4 class="text-primary">{{ residente.nombre_completo }}</h4>
+                        
+                        <div class="row mb-3">
+                            <div class="col-sm-4">
+                                <strong>Tipo de Residente:</strong>
+                            </div>
+                            <div class="col-sm-8">
+                                {% if residente.tipo == 'propietario' %}
+                                    <span class="badge bg-success fs-6">Propietario</span>
+                                {% else %}
+                                    <span class="badge bg-info fs-6">Inquilino</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-sm-4">
+                                <strong>Fecha de Registro:</strong>
+                            </div>
+                            <div class="col-sm-8">
+                                {{ residente.created_at|date:"d/m/Y H:i" }}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-sm-4">
+                                <strong>Última Actualización:</strong>
+                            </div>
+                            <div class="col-sm-8">
+                                {{ residente.updated_at|date:"d/m/Y H:i" }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información del Apartamento -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-home"></i> Información del Apartamento
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Ubicación</h6>
+                        <p class="mb-2">
+                            <strong>Edificio:</strong> {{ apartamento.edificio.numero }}<br>
+                            <strong>Piso:</strong> {{ apartamento.piso }}<br>
+                            <strong>Apartamento:</strong> {{ apartamento.numero }}
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Estadísticas</h6>
+                        <p class="mb-2">
+                            <strong>Total Residentes:</strong> {{ total_residentes }}/6<br>
+                            <strong>Propietario:</strong> 
+                            {% if propietario %}
+                                <span class="text-success">✓ Asignado</span>
+                            {% else %}
+                                <span class="text-danger">✗ Sin asignar</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel Lateral -->
+    <div class="col-lg-4">
+        <!-- Otros Residentes del Apartamento -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-users"></i> Otros Residentes del Apartamento
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if propietario and propietario.id != residente.id %}
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-crown text-warning"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-2">
+                            <strong>{{ propietario.nombre_completo }}</strong><br>
+                            <small class="text-muted">Propietario</small>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                {% for inquilino in inquilinos %}
+                    {% if inquilino.id != residente.id %}
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-user text-info"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-2">
+                                <strong>{{ inquilino.nombre_completo }}</strong><br>
+                                <small class="text-muted">Inquilino</small>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if total_residentes == 1 %}
+                    <p class="text-muted small mb-0">
+                        <i class="fas fa-info-circle"></i> Este es el único residente del apartamento
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Acciones Rápidas -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-tools"></i> Acciones
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'residentes_frontend:buscar_residentes' %}" 
+                       class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-arrow-left"></i> Volver a Búsqueda
+                    </a>
+                    
+                    <button type="button" 
+                            class="btn btn-outline-danger btn-sm"
+                            onclick="confirmarEliminacion('{{ residente.id }}', '{{ residente.nombre_completo }}')">
+                        <i class="fas fa-trash"></i> Eliminar Residente
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmación de Eliminación -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle text-danger"></i> Confirmar Eliminación
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro de que desea eliminar al residente <strong id="residenteNombre"></strong>?</p>
+                <p class="text-muted small">Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <form method="post" action="{% url 'residentes_frontend:eliminar_residente' residente.id %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Eliminar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function confirmarEliminacion(residenteId, nombreResidente) {
+    document.getElementById('residenteNombre').textContent = nombreResidente;
+    
+    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    deleteModal.show();
+}
+</script>
+{% endblock %}
