@@ -5,10 +5,19 @@
 {% block content %}
 <div class="row">
     <div class="col-12">
-        <h1 class="mb-4">
-            <i class="fas fa-search"></i> Buscar Residentes
-        </h1>
-        <p class="lead text-muted">Encuentre residentes usando diferentes criterios de búsqueda</p>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="mb-2">
+                    <i class="fas fa-search"></i> Buscar Residentes
+                </h1>
+                <p class="lead text-muted mb-0">Encuentre residentes usando diferentes criterios de búsqueda</p>
+            </div>
+            <div>
+                <a href="{% url 'residentes_frontend:subir_residente' %}" class="btn btn-success btn-lg">
+                    <i class="fas fa-user-plus"></i> Crear Nuevo Residente
+                </a>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -143,8 +152,13 @@
                                            class="btn btn-sm btn-outline-primary">
                                             <i class="fas fa-eye"></i> Ver Detalles
                                         </a>
+                                        <a href="{% url 'residentes_frontend:subir_residente' %}?apartamento_id={{ residente.apartamento.id }}&edificio_id={{ residente.apartamento.edificio.id }}&piso={{ residente.apartamento.piso }}" 
+                                           class="btn btn-sm btn-outline-success ms-1"
+                                           title="Agregar residente al mismo apartamento">
+                                            <i class="fas fa-user-plus"></i> Agregar
+                                        </a>
                                         <button type="button" 
-                                                class="btn btn-sm btn-outline-danger ms-2"
+                                                class="btn btn-sm btn-outline-danger ms-1"
                                                 onclick="confirmarEliminacion('{{ residente.id }}', '{{ residente.nombre_completo }}')">
                                             <i class="fas fa-trash"></i> Eliminar
                                         </button>

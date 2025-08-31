@@ -71,9 +71,25 @@ def subir_residente(request):
         edificios = EdificioService.listar_edificios()
         apartamentos = ApartamentoService.obtener_apartamentos_con_residentes()
         
+        # Obtener parámetros de la URL para preselección
+        apartamento_id = request.GET.get('apartamento_id')
+        edificio_id = request.GET.get('edificio_id')
+        piso = request.GET.get('piso')
+        
+        # Si se proporciona un apartamento_id, obtener sus detalles
+        apartamento_preseleccionado = None
+        if apartamento_id:
+            try:
+                apartamento_preseleccionado = Apartamento.objects.get(id=apartamento_id)
+            except Apartamento.DoesNotExist:
+                pass
+        
         context = {
             'edificios': edificios,
-            'apartamentos': apartamentos
+            'apartamentos': apartamentos,
+            'apartamento_preseleccionado': apartamento_preseleccionado,
+            'edificio_id_preseleccionado': edificio_id,
+            'piso_preseleccionado': piso
         }
         return render(request, 'residentes/subir_residente.html', context)
         

@@ -75,7 +75,8 @@
                             <select class="form-select" id="edificio_select" required>
                                 <option value="">Seleccione un edificio</option>
                                 {% for edificio in edificios %}
-                                <option value="{{ edificio.id }}">
+                                <option value="{{ edificio.id }}" 
+                                        {% if edificio_id_preseleccionado == edificio.id|stringformat:"s" %}selected{% endif %}>
                                     Edificio {{ edificio.numero }}
                                 </option>
                                 {% endfor %}
@@ -88,7 +89,7 @@
                             <select class="form-select" id="piso" required>
                                 <option value="">Seleccione el piso</option>
                                 {% for i in "12345678" %}
-                                <option value="{{ i }}">Piso {{ i }}</option>
+                                <option value="{{ i }}" {% if piso_preseleccionado == i %}selected{% endif %}>Piso {{ i }}</option>
                                 {% endfor %}
                             </select>
                         </div>
