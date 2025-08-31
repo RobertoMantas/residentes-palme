@@ -260,6 +260,14 @@ document.addEventListener('DOMContentLoaded', function() {
     pisoSelect.addEventListener('change', actualizarApartamentos);
     apartamentoSelect.addEventListener('change', actualizarInfoApartamento);
     
+    // Si hay valores preseleccionados, cargar automáticamente los apartamentos
+    if (edificioSelect.value && pisoSelect.value) {
+        // Cargar apartamentos automáticamente al cargar la página
+        setTimeout(function() {
+            actualizarApartamentos();
+        }, 100);
+    }
+    
     // Validación del formulario
     document.getElementById('residenteForm').addEventListener('submit', function(e) {
         const nombre = document.getElementById('nombre_completo').value.trim();
